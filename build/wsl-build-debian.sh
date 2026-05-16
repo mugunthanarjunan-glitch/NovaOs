@@ -49,47 +49,47 @@ log "📁 Setting up build directory..."
 mkdir -p "${PROJECT_ROOT}/build-dir"
 cd "${PROJECT_ROOT}/build-dir"
 
-# Check if already configured
-if [ -f .build/config ]; then
-    log "ℹ️  Build already configured, proceeding to build..."
-else
-    log "⚙️  Configuring pure Debian live-build..."
-    
-    # Clean any old config
-    rm -rf .build 2>/dev/null || true
-    
-    lb config \
-        --mode debian \
-        --distribution "${DEBIAN_RELEASE}" \
-        --parent-distribution "${DEBIAN_RELEASE}" \
-        --keyring-packages debian-archive-keyring \
-        --binary-images "${IMAGE_TYPE}" \
-        --mirror-bootstrap "${DEBIAN_MIRROR}" \
-        --mirror-chroot "${DEBIAN_MIRROR}" \
-        --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
-        --parent-mirror-chroot "${DEBIAN_MIRROR}" \
-        --archive-areas "${ARCHIVE_AREAS}" \
-        --security false \
-        --linux-flavours amd64 \
-        --architectures "${ARCHITECTURE}" \
-        --bootappend-live "${BOOT_APPEND}" \
-        --debian-installer false \
-        --apt-indices false \
-        --apt-recommends false \
-        --memtest none \
-        --iso-application "NovaOS" \
-        --iso-publisher "NovaOS" \
-        --iso-volume "NovaOS"
-    
-    log "📦 Copying package lists..."
-    mkdir -p config/package-lists
-    cp "${PACKAGE_LISTS_DIR}"/*.list.chroot config/package-lists/ 2>/dev/null || true
-    
-    log "📂 Copying filesystem overlay..."
-    if [ -d "${INCLUDES_DIR}" ]; then
-        mkdir -p config/includes.chroot
-        cp -r "${INCLUDES_DIR}"/* config/includes.chroot/ 2>/dev/null || true
-    fi
+# CRITICAL: Always force clean before config to ensure fresh configuration
+# This prevents using cached .build/config with old parameters
+log "🧹 Cleaning old build cache..."
+sudo lb clean --purge 2>/dev/null || true
+rm -rf .build 2>/dev/null || true
+rm -rf binary 2>/dev/null || true
+rm -rf chroot 2>/dev/null || true
+
+log "⚙️  Configuring pure Debian live-build (FRESH)..."
+
+lb config \
+    --mode debian \
+    --distribution "${DEBIAN_RELEASE}" \
+    --parent-distribution "${DEBIAN_RELEASE}" \
+    --keyring-packages debian-archive-keyring \
+    --binary-images "${IMAGE_TYPE}" \
+    --mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --mirror-chroot "${DEBIAN_MIRROR}" \
+    --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --parent-mirror-chroot "${DEBIAN_MIRROR}" \
+    --archive-areas "${ARCHIVE_AREAS}" \
+    --security false \
+    --linux-flavours amd64 \
+    --architectures "${ARCHITECTURE}" \
+    --bootappend-live "${BOOT_APPEND}" \
+    --debian-installer false \
+    --apt-indices false \
+    --apt-recommends false \
+    --memtest none \
+    --iso-application "NovaOS" \
+    --iso-publisher "NovaOS" \
+    --iso-volume "NovaOS"
+
+log "📦 Copying package lists..."
+mkdir -p config/package-lists
+cp "${PACKAGE_LISTS_DIR}"/*.list.chroot config/package-lists/ 2>/dev/null || true
+
+log "📂 Copying filesystem overlay..."
+if [ -d "${INCLUDES_DIR}" ]; then
+    mkdir -p config/includes.chroot
+    cp -r "${INCLUDES_DIR}"/* config/includes.chroot/ 2>/dev/null || true
 fi
 
 # === PREPARE ISOLINUX ===
