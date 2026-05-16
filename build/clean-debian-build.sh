@@ -76,7 +76,7 @@ lb config \
     --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
     --security false \
-    --linux-flavours amd64 \
+    --linux-packages none \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \
