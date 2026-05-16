@@ -37,8 +37,7 @@ zip
 # --- Network Manager GUI ---
 network-manager-gnome
 
-# --- System Monitor ---
-xfce4-taskmanager
+# --- System Monitor (xfce4-taskmanager is in desktop.list) ---
 htop
 
 # --- Software Center ---
@@ -50,8 +49,7 @@ gparted
 # --- Calculator ---
 galculator
 
-# --- Screenshot ---
-xfce4-screenshooter
+# --- Screenshot (xfce4-screenshooter is in desktop.list) ---
 
 # --- System Info ---
 neofetch

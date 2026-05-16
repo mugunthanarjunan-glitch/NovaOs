@@ -11,8 +11,8 @@ gnome-software-plugin-flatpak
 # --- AppImage Runtime Dependency ---
 libfuse2
 
-# --- Wine (Windows App Compatibility) ---
-wine
+# --- Wine (Windows App Compatibility, 64-bit only) ---
+wine64
 
 # --- ZRAM (Memory Optimization) ---
 zram-tools

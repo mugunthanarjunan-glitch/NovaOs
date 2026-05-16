@@ -11,12 +11,8 @@ echo "[NovaOS Hook] Configuring Plymouth boot splash..."
 PLYMOUTH_DIR="/usr/share/plymouth/themes/novaos"
 mkdir -p "${PLYMOUTH_DIR}"
 
-# --- Copy theme files (from includes.chroot) ---
-if [ -d /tmp/novaos-plymouth ]; then
-    cp /tmp/novaos-plymouth/novaos.plymouth "${PLYMOUTH_DIR}/" 2>/dev/null || true
-    cp /tmp/novaos-plymouth/novaos.script "${PLYMOUTH_DIR}/" 2>/dev/null || true
-    cp /tmp/novaos-plymouth/images/* "${PLYMOUTH_DIR}/" 2>/dev/null || true
-fi
+# --- Theme files are placed by build.sh via includes.chroot ---
+# They should already be at ${PLYMOUTH_DIR}/ at this point.
 
 # If theme files are already in the right place via includes.chroot, skip
 if [ ! -f "${PLYMOUTH_DIR}/novaos.plymouth" ]; then

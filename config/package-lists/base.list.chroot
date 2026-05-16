@@ -6,7 +6,8 @@
 # ============================================================================
 
 # --- Kernel ---
-linux-image-amd64
+# NOTE: linux-image is installed by live-build via --linux-packages/--linux-flavours
+# Do NOT add linux-image-amd64 here or it will conflict with lb's kernel detection
 
 # --- Live System ---
 live-boot
@@ -16,14 +17,14 @@ live-config-systemd
 # --- Init System ---
 systemd-sysv
 
-# --- Bootloader (supports both BIOS and EFI) ---
+# --- Bootloader ---
+# NOTE: live-build handles the ISO bootloader automatically.
+# These packages are for the INSTALLED system (Calamares runs grub-install).
 grub-efi-amd64
-grub-efi-amd64-signed
 grub-pc-bin
 grub-common
 grub2-common
 efibootmgr
-shim-signed
 
 # --- Firmware ---
 firmware-linux-free
@@ -44,8 +45,6 @@ network-manager
 wpasupplicant
 iproute2
 iputils-ping
-ifupdown
-dhcpcd-base
 
 # --- Filesystem ---
 e2fsprogs
