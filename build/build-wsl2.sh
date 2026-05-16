@@ -72,7 +72,7 @@
  sudo rm -rf .build cache chroot binary 2>/dev/null || true
  sudo lb clean --purge 2>/dev/null || true
  
- # --- Step 4: Configure live-build ---
+  # --- Step 4: Configure live-build ---
  log "⚙️  Configuring live-build..."
  lb config \
      --mode debian \
@@ -86,7 +86,6 @@
      --mirror-chroot "${DEBIAN_MIRROR}" \
      --security false \
      --keyring-packages debian-archive-keyring \
-     --linux-packages none \
      --architectures "${ARCHITECTURE}" \
      --bootappend-live "${BOOT_APPEND}" \
      --debian-installer false \
@@ -96,7 +95,6 @@
      --iso-application "NovaOS" \
      --iso-publisher "NovaOS" \
      --iso-volume "NovaOS"
- 
  # --- Step 5: Copy project files ---
  log "📦 Copying package lists..."
  mkdir -p config/package-lists
