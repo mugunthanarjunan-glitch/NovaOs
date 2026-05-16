@@ -52,9 +52,10 @@ mkdir -p "${PROJECT_ROOT}/${BUILD_DIR}"
 cd "${PROJECT_ROOT}/${BUILD_DIR}"
 
 # --- Clean Previous Build (if any) ---
-if [ -f .build/config ]; then
-    warn "Previous build detected. Cleaning..."
-    lb clean --chroot
+if [ -d .build ]; then
+    warn "Previous build cache detected. Cleaning..."
+    sudo lb clean --purge 2>/dev/null || true
+    rm -rf .build binary source 2>/dev/null || true
 fi
 
 # --- Configure live-build ---
@@ -63,11 +64,13 @@ log "⚙️  Configuring live-build..."
 # Note: When building on Ubuntu, live-build defaults to ubuntu-keyring which
 # doesn't exist in Debian repos. We explicitly set --mode debian and
 # --keyring-packages to force Debian mode regardless of host OS.
+# Using Debian Bookworm (stable) as the base distribution.
 lb config \
     --mode debian \
+    --distribution bookworm \
     --binary-images "${IMAGE_TYPE}" \
     --distribution "${DEBIAN_RELEASE}" \
-    --parent-distribution "${DEBIAN_RELEASE}" \
+    --parent-distribution bookworm \
     --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
     --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
