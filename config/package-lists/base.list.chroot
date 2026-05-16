@@ -6,8 +6,8 @@
 # ============================================================================
 
 # --- Kernel ---
-# NOTE: linux-image is installed by live-build via --linux-packages/--linux-flavours
-# Do NOT add linux-image-amd64 here or it will conflict with lb's kernel detection
+# Installed as a regular package since --linux-packages is set to "none"
+linux-image-amd64
 
 # --- Live System ---
 live-boot
