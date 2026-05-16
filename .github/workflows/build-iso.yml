@@ -40,6 +40,35 @@ jobs:
             dosfstools \
             debian-archive-keyring
 
+      - name: Prepare isolinux boot files
+        run: |
+          echo "Preparing isolinux files for live-build..."
+          sudo mkdir -p /root/isolinux
+          
+          # Copy from primary location
+          if [ -d /usr/lib/isolinux ]; then
+            sudo cp /usr/lib/isolinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/isolinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/isolinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/isolinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/isolinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+            echo "Copied from /usr/lib/isolinux"
+          fi
+          
+          # Copy from syslinux location
+          if [ -d /usr/lib/syslinux ]; then
+            sudo cp /usr/lib/syslinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/syslinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/syslinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/syslinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/lib/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+            echo "Copied from /usr/lib/syslinux"
+          fi
+          
+          # Verify
+          echo "Isolinux files prepared:"
+          sudo ls -lh /root/isolinux/ || echo "Warning: /root/isolinux may be empty"
+
       - name: Make scripts executable
         run: |
           chmod +x build/*.sh
@@ -53,8 +82,20 @@ jobs:
           sudo apt-get install -y dos2unix
           find . -name "*.sh" -exec dos2unix {} \;
           find . -name "*.hook.chroot" -exec dos2unix {} \;
+          find . -name "*.hook.binary" -exec dos2unix {} \;
           find . -name "*.list.chroot" -exec dos2unix {} \;
           find . -name "*.conf" -exec dos2unix {} \;
+
+      - name: Final isolinux verification
+        run: |
+          echo "Final check of isolinux files before build..."
+          sudo ls -lah /root/isolinux/
+          echo ""
+          echo "Checking for isolinux.bin:"
+          sudo find /usr -name "isolinux.bin" -type f 2>/dev/null || echo "Not found in /usr"
+          echo ""
+          echo "Checking for vesamenu.c32:"
+          sudo find /usr -name "vesamenu.c32" -type f 2>/dev/null || echo "Not found in /usr"
 
       - name: Build NovaOS ISO
         run: |

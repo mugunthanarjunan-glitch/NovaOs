@@ -138,6 +138,34 @@ if [ -d "${HOOKS_DIR}/binary" ]; then
     chmod +x config/hooks/binary/*.hook.binary 2>/dev/null || true
 fi
 
+# --- Prepare isolinux files before build ---
+log "📋 Preparing isolinux boot files..."
+mkdir -p /root/isolinux
+
+# Try to find and copy isolinux files from system
+if [ -d /usr/lib/isolinux ]; then
+    cp /usr/lib/isolinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+elif [ -d /usr/lib/syslinux ]; then
+    cp /usr/lib/syslinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+fi
+
+# Verify files
+if [ -f /root/isolinux/isolinux.bin ] && [ -f /root/isolinux/vesamenu.c32 ]; then
+    log "✅ Isolinux boot files ready"
+    ls -lh /root/isolinux/ || true
+else
+    warn "⚠️  Isolinux files may be incomplete, but continuing..."
+    ls -lh /root/isolinux/ 2>/dev/null || echo "Directory exists but may be empty"
+fi
+
 # --- Step 6: Build ---
 log "🔨 Building NovaOS ISO... (15-45 minutes)"
 log "   Go grab a coffee ☕"
