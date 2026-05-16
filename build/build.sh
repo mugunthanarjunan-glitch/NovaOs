@@ -130,6 +130,11 @@ if [ -d "${HOOKS_DIR}/live" ]; then
     cp "${HOOKS_DIR}"/live/*.hook.chroot config/hooks/live/ 2>/dev/null || true
     chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
 fi
+if [ -d "${HOOKS_DIR}/binary" ]; then
+    mkdir -p config/hooks/binary
+    cp "${HOOKS_DIR}"/binary/*.hook.binary config/hooks/binary/ 2>/dev/null || true
+    chmod +x config/hooks/binary/*.hook.binary 2>/dev/null || true
+fi
 
 # --- Build the ISO ---
 log "🔨 Starting ISO build... This will take 15-45 minutes."

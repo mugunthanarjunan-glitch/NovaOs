@@ -46,6 +46,7 @@ jobs:
           chmod +x optimization/*.sh
           chmod +x config/hooks/normal/*.hook.chroot
           chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
+          chmod +x config/hooks/binary/*.hook.binary 2>/dev/null || true
 
       - name: Fix line endings (Windows→Linux)
         run: |

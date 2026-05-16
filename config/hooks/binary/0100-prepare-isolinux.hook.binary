@@ -1,0 +1,46 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Binary Hook: Prepare Isolinux Files
+# ============================================================================
+# Copies isolinux boot files to the location expected by live-build.
+# This ensures the bootable ISO is created properly.
+#
+# Runs during the binary stage (after chroot).
+# ============================================================================
+
+set -e
+
+echo "[NovaOS] Preparing isolinux boot files..."
+
+# Create isolinux directory in root
+mkdir -p /root/isolinux
+
+# Copy isolinux files from package installation
+if [ -d /usr/lib/isolinux ]; then
+    cp /usr/lib/isolinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/isolinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+    echo "[NovaOS] ✅ Isolinux files prepared from /usr/lib/isolinux"
+fi
+
+# Alternative location for syslinux
+if [ -d /usr/lib/syslinux ]; then
+    cp /usr/lib/syslinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+    cp /usr/lib/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+    echo "[NovaOS] ✅ Isolinux files prepared from /usr/lib/syslinux"
+fi
+
+# Verify files exist
+if [ -f /root/isolinux/isolinux.bin ] && [ -f /root/isolinux/vesamenu.c32 ]; then
+    echo "[NovaOS] ✅ Isolinux boot files verified successfully"
+    ls -lh /root/isolinux/
+else
+    echo "[NovaOS] ⚠️  Warning: Some isolinux files may be missing, but continuing..."
+fi
+
+exit 0
