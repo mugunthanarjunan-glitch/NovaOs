@@ -70,7 +70,7 @@ else
         --parent-mirror-chroot "${DEBIAN_MIRROR}" \
         --archive-areas "${ARCHIVE_AREAS}" \
         --security false \
-        --linux-packages "linux-image-amd64" \
+        --linux-flavours amd64 \
         --architectures "${ARCHITECTURE}" \
         --bootappend-live "${BOOT_APPEND}" \
         --debian-installer false \

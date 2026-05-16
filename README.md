@@ -86,10 +86,19 @@ See [docs/VIRTUALBOX_TESTING.md](docs/VIRTUALBOX_TESTING.md) for the complete gu
 
 ## 📖 Documentation
 
-- **[BUILD.md](docs/BUILD.md)** — Detailed build instructions
-- **[VIRTUALBOX_TESTING.md](docs/VIRTUALBOX_TESTING.md)** — VirtualBox testing guide
-- **[OPTIMIZATION.md](docs/OPTIMIZATION.md)** — Performance optimization details
-- **[ROADMAP.md](docs/ROADMAP.md)** — Future development plans
+### Quick Start
+- **[BUILD_QUICK_REFERENCE.md](BUILD_QUICK_REFERENCE.md)** — TL;DR build commands
+- **[DEBIAN_BUILD_GUIDE.md](DEBIAN_BUILD_GUIDE.md)** — Complete Debian build instructions
+- **[KERNEL_FIX_SUMMARY.md](KERNEL_FIX_SUMMARY.md)** — Kernel detection fix details
+
+### Detailed Guides
+- **[docs/BUILD.md](docs/BUILD.md)** — Detailed build process
+- **[docs/VIRTUALBOX_TESTING.md](docs/VIRTUALBOX_TESTING.md)** — VirtualBox testing guide
+- **[docs/OPTIMIZATION.md](docs/OPTIMIZATION.md)** — Performance optimization details
+- **[docs/ROADMAP.md](docs/ROADMAP.md)** — Future development plans
+
+### Technical
+- **[KERNEL_FIX_GUIDE.md](KERNEL_FIX_GUIDE.md)** — Technical kernel details
 
 ## 🛠️ Technology Stack
 

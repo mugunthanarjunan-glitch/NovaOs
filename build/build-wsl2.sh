@@ -87,7 +87,7 @@ lb config \
     --mirror-chroot "${DEBIAN_MIRROR}" \
     --security false \
     --keyring-packages debian-archive-keyring \
-    --linux-packages "none" \
+    --linux-flavours amd64 \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \

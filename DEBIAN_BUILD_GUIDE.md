@@ -15,6 +15,12 @@ NovaOS has been converted to a **pure Debian-based distribution**:
 
 ## 🚀 Building in WSL (Windows)
 
+### Prerequisites
+- WSL2 with Debian or Ubuntu installed
+- At least 2GB RAM allocated to WSL
+- 20GB free disk space
+- `sudo` access (no password prompt)
+
 ### Step 1: Open WSL Terminal
 
 ```bash
@@ -65,6 +71,9 @@ sudo ./build/wsl-build-debian.sh
 When successful, you'll see:
 ```
 [2026-05-16 23:00:00] lb_build
+[2026-05-16 23:00:05] lb_bootstrap
+[2026-05-16 23:05:00] lb_chroot_linux-image
+  ✅ Installing linux-image-amd64...
 ...
 P: Begin creating ISO file...
 P: Done with ISO file.
@@ -73,6 +82,12 @@ P: Done with ISO file.
 [NovaOS] 📀 ISO: /path/to/build-dir/live-image-amd64.iso
 [NovaOS] 📊 Size: 1.2 GB
 ```
+
+### Kernel Installation (Fixed)
+- Uses `--linux-flavours amd64` (not deprecated `--linux-packages`)
+- No more `404 Not Found` for `Contents-amd64.gz`
+- Kernel installs cleanly: `linux-image-amd64`
+- See **KERNEL_FIX_GUIDE.md** for technical details
 
 ## 🔧 Configuration Files
 
