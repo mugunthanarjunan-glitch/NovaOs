@@ -45,10 +45,14 @@ apt-get install -y \
     debootstrap \
     squashfs-tools \
     xorriso \
+    isolinux \
+    syslinux \
+    syslinux-common \
     grub-efi-amd64-bin \
     grub-pc-bin \
     mtools \
     dosfstools \
+    debian-archive-keyring \
     wget \
     curl \
     git \
