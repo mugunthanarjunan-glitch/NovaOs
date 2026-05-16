@@ -66,14 +66,15 @@ fi
 # --- Configure live-build ---
 log "⚙️  Configuring live-build..."
 
-# CRITICAL: Force Debian mode explicitly
-# By default, lb tries to use Ubuntu if running on Ubuntu/WSL
-# We must specify --mode debian and use debian-archive-keyring
-log "📦 Forcing Debian (bookworm) mode..."
+# CRITICAL: Pure Debian mode (no Ubuntu contamination)
+# - Force --mode debian explicitly
+# - Use only Debian keyring and mirrors
+# - Disable Ubuntu-specific features
+log "📦 Configuring pure Debian build system..."
 lb config \
     --mode debian \
-    --distribution bookworm \
-    --parent-distribution bookworm \
+    --distribution "${DEBIAN_RELEASE}" \
+    --parent-distribution "${DEBIAN_RELEASE}" \
     --keyring-packages debian-archive-keyring \
     --binary-images "${IMAGE_TYPE}" \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
@@ -82,7 +83,7 @@ lb config \
     --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
     --security false \
-    --linux-packages "none" \
+    --linux-packages "linux-image-amd64" \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \

@@ -13,9 +13,9 @@ DISTRO_CODENAME="nova"
 DISTRO_FULLNAME="${DISTRO_NAME} ${DISTRO_VERSION}"
 
 # --- Debian Base ---
-DEBIAN_RELEASE="bookworm"
+DEBIAN_RELEASE="bullseye"
 ARCHITECTURE="amd64"
-ARCHIVE_AREAS="main contrib non-free non-free-firmware"
+ARCHIVE_AREAS="main contrib non-free"
 DEBIAN_MIRROR="http://deb.debian.org/debian"
 
 # --- Kernel ---
