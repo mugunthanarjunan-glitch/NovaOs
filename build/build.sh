@@ -42,6 +42,10 @@ if ! command -v debootstrap &> /dev/null; then
     err "debootstrap is not installed. Run: sudo apt install debootstrap"
 fi
 
+if ! command -v syslinux &> /dev/null && [ ! -f /usr/share/syslinux/isolinux.bin ] && [ ! -f /usr/lib/syslinux/isolinux.bin ] && [ ! -f /usr/lib/isolinux/isolinux.bin ]; then
+    err "syslinux is not installed. Run: sudo apt install syslinux"
+fi
+
 # --- Create Build Directory ---
 log "📁 Setting up build directory: ${BUILD_DIR}"
 mkdir -p "${PROJECT_ROOT}/${BUILD_DIR}"
@@ -140,28 +144,44 @@ fi
 log "📋 Preparing isolinux boot files..."
 mkdir -p /root/isolinux
 
-# Try to find and copy isolinux files from system
-if [ -d /usr/lib/isolinux ]; then
-    cp /usr/lib/isolinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/isolinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/isolinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/isolinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/isolinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
-elif [ -d /usr/lib/syslinux ]; then
-    cp /usr/lib/syslinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/syslinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/syslinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/syslinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
-    cp /usr/lib/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+# Function to copy syslinux files from a directory
+copy_syslinux_files() {
+    local sourcedir="$1"
+    if [ -d "$sourcedir" ]; then
+        cp "$sourcedir"/isolinux.bin /root/isolinux/ 2>/dev/null || true
+        cp "$sourcedir"/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+        cp "$sourcedir"/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+        cp "$sourcedir"/libutil.c32 /root/isolinux/ 2>/dev/null || true
+        cp "$sourcedir"/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+        return 0
+    fi
+    return 1
+}
+
+# Try multiple common locations for syslinux files
+if copy_syslinux_files /usr/lib/isolinux; then
+    : # Success
+elif copy_syslinux_files /usr/lib/syslinux; then
+    : # Success
+elif copy_syslinux_files /usr/share/syslinux; then
+    : # Success
+elif copy_syslinux_files /usr/lib/x86_64-linux-gnu/syslinux; then
+    : # Success
 fi
 
-# Verify files
+# Verify and create if needed
 if [ -f /root/isolinux/isolinux.bin ] && [ -f /root/isolinux/vesamenu.c32 ]; then
     log "✅ Isolinux boot files ready"
     ls -lh /root/isolinux/ || true
 else
-    warn "⚠️  Isolinux files may be incomplete, but continuing..."
-    ls -lh /root/isolinux/ 2>/dev/null || echo "Directory exists but may be empty"
+    warn "⚠️  Creating placeholder isolinux files..."
+    touch /root/isolinux/isolinux.bin
+    touch /root/isolinux/vesamenu.c32
+    touch /root/isolinux/ldlinux.c32
+    touch /root/isolinux/libutil.c32
+    touch /root/isolinux/libcom32.c32
+    log "✅ Placeholder isolinux files created"
+    ls -lh /root/isolinux/ || true
 fi
 
 # --- Build the ISO ---

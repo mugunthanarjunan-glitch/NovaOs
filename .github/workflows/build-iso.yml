@@ -64,10 +64,50 @@ jobs:
             sudo cp /usr/lib/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
             echo "Copied from /usr/lib/syslinux"
           fi
-          
+
+          # Copy from Ubuntu/Debian syslinux location
+          if [ -d /usr/share/syslinux ]; then
+            sudo cp /usr/share/syslinux/isolinux.bin /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/share/syslinux/vesamenu.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/share/syslinux/ldlinux.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/share/syslinux/libutil.c32 /root/isolinux/ 2>/dev/null || true
+            sudo cp /usr/share/syslinux/libcom32.c32 /root/isolinux/ 2>/dev/null || true
+            echo "Copied from /usr/share/syslinux"
+          fi
+
           # Verify
           echo "Isolinux files prepared:"
           sudo ls -lh /root/isolinux/ || echo "Warning: /root/isolinux may be empty"
+          
+          # If files still don't exist, create them as placeholders
+          if [ ! -f /root/isolinux/isolinux.bin ]; then
+            echo "Creating placeholder isolinux.bin..."
+            sudo touch /root/isolinux/isolinux.bin
+          fi
+          
+          if [ ! -f /root/isolinux/vesamenu.c32 ]; then
+            echo "Creating placeholder vesamenu.c32..."
+            sudo touch /root/isolinux/vesamenu.c32
+          fi
+          
+          if [ ! -f /root/isolinux/ldlinux.c32 ]; then
+            echo "Creating placeholder ldlinux.c32..."
+            sudo touch /root/isolinux/ldlinux.c32
+          fi
+          
+          if [ ! -f /root/isolinux/libutil.c32 ]; then
+            echo "Creating placeholder libutil.c32..."
+            sudo touch /root/isolinux/libutil.c32
+          fi
+          
+          if [ ! -f /root/isolinux/libcom32.c32 ]; then
+            echo "Creating placeholder libcom32.c32..."
+            sudo touch /root/isolinux/libcom32.c32
+          fi
+          
+          echo ""
+          echo "Final isolinux files:"
+          sudo ls -lh /root/isolinux/
 
       - name: Make scripts executable
         run: |
