@@ -69,8 +69,8 @@ lb config \
     --archive-areas "${ARCHIVE_AREAS}" \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
     --mirror-chroot "${DEBIAN_MIRROR}" \
-    --mirror-chroot-security "http://security.debian.org/debian-security" \
-    --parent-mirror-chroot-security "http://security.debian.org/debian-security" \
+    --security false \
+    --updates false \
     --keyring-packages debian-archive-keyring \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
