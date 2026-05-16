@@ -55,6 +55,9 @@ fi
 
 # --- Configure live-build ---
 log "⚙️  Configuring live-build..."
+
+# Note: We use = sign for compound options to prevent shell argument splitting.
+# The kernel is included via package-lists/base.list.chroot instead of --linux-packages.
 lb config \
     --binary-images "${IMAGE_TYPE}" \
     --distribution "${DEBIAN_RELEASE}" \
@@ -62,16 +65,13 @@ lb config \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
     --mirror-chroot-security "http://security.debian.org/debian-security" \
     --architectures "${ARCHITECTURE}" \
-    --linux-packages "${KERNEL_PACKAGE}" \
-    --linux-flavours "${KERNEL_FLAVOUR}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \
-    --debootstrap-options "--variant=minbase" \
     --apt-indices false \
     --memtest none \
-    --iso-application "${DISTRO_FULLNAME}" \
-    --iso-publisher "${DISTRO_NAME}" \
-    --iso-volume "${DISTRO_NAME} ${DISTRO_VERSION}"
+    --iso-application "NovaOS" \
+    --iso-publisher "NovaOS" \
+    --iso-volume "NovaOS"
 
 # --- Copy Package Lists ---
 log "📦 Copying package lists..."

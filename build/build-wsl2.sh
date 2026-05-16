@@ -78,16 +78,13 @@ lb config \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
     --mirror-chroot-security "http://security.debian.org/debian-security" \
     --architectures "${ARCHITECTURE}" \
-    --linux-packages "${KERNEL_PACKAGE}" \
-    --linux-flavours "${KERNEL_FLAVOUR}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \
-    --debootstrap-options "--variant=minbase" \
     --apt-indices false \
     --memtest none \
-    --iso-application "${DISTRO_FULLNAME}" \
-    --iso-publisher "${DISTRO_NAME}" \
-    --iso-volume "${DISTRO_NAME} ${DISTRO_VERSION}"
+    --iso-application "NovaOS" \
+    --iso-publisher "NovaOS" \
+    --iso-volume "NovaOS"
 
 # --- Step 5: Copy project files ---
 log "📦 Copying package lists..."
