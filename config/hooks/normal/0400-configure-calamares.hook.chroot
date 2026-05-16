@@ -2,30 +2,18 @@
 # ============================================================================
 # NovaOS Build Hook: Configure Calamares Installer
 # ============================================================================
-# Copies Calamares configuration and creates the desktop shortcut.
+# Copies Calamares configuration from the project's installer/ directory
+# (placed in the chroot via includes.chroot) and creates desktop shortcuts.
 # ============================================================================
 
 set -e
 echo "[NovaOS Hook] Configuring Calamares installer..."
 
-# --- Copy Calamares configuration ---
+# --- Setup Calamares configuration directory ---
 CALA_DIR="/etc/calamares"
 mkdir -p "${CALA_DIR}"
 mkdir -p "${CALA_DIR}/modules"
 mkdir -p "${CALA_DIR}/branding/novaos"
-
-# Copy settings (these should be in includes.chroot)
-if [ -f /tmp/novaos-installer/settings.conf ]; then
-    cp /tmp/novaos-installer/settings.conf "${CALA_DIR}/"
-fi
-
-if [ -d /tmp/novaos-installer/modules ]; then
-    cp /tmp/novaos-installer/modules/*.conf "${CALA_DIR}/modules/"
-fi
-
-if [ -d /tmp/novaos-installer/branding/novaos ]; then
-    cp -r /tmp/novaos-installer/branding/novaos/* "${CALA_DIR}/branding/novaos/"
-fi
 
 # --- Create desktop shortcut for live session ---
 mkdir -p /etc/skel/Desktop
@@ -45,20 +33,174 @@ chmod +x /etc/skel/Desktop/install-novaos.desktop
 
 # Also put it in system applications
 mkdir -p /usr/share/applications
-cat > /usr/share/applications/install-novaos.desktop << 'EOF'
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Install NovaOS
-Comment=Install NovaOS to your hard drive
-Exec=pkexec calamares
-Icon=calamares
-Terminal=false
-Categories=System;
-StartupNotify=true
+cp /etc/skel/Desktop/install-novaos.desktop /usr/share/applications/
+
+# --- Create Calamares settings.conf ---
+cat > "${CALA_DIR}/settings.conf" << 'EOF'
+---
+modules-search: [ local, /usr/lib/calamares/modules ]
+sequence:
+  - show:
+    - welcome
+    - locale
+    - keyboard
+    - partition
+    - users
+    - summary
+  - exec:
+    - partition
+    - mount
+    - unpackfs
+    - machineid
+    - fstab
+    - locale
+    - keyboard
+    - localecfg
+    - luksbootkeyfile
+    - users
+    - displaymanager
+    - networkcfg
+    - hwclock
+    - services-systemd
+    - packages
+    - grubcfg
+    - bootloader
+    - umount
+  - show:
+    - finished
+branding: novaos
+prompt-install: true
+dont-chroot: false
+disable-cancel: false
+disable-cancel-during-exec: true
 EOF
 
-# --- Configure unpackfs module for Calamares ---
+# --- Create branding ---
+cat > "${CALA_DIR}/branding/novaos/branding.desc" << 'EOF'
+---
+componentName: novaos
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+strings:
+    productName:         "NovaOS"
+    shortProductName:    "NovaOS"
+    version:             "1.0"
+    shortVersion:        "1.0"
+    versionedName:       "NovaOS 1.0"
+    shortVersionedName:  "NovaOS 1.0"
+    bootloaderEntryName: "NovaOS"
+    productUrl:          "https://novaos.org"
+    supportUrl:          "https://novaos.org/support"
+    knownIssuesUrl:      "https://novaos.org/issues"
+    releaseNotesUrl:     "https://novaos.org/releases/1.0"
+    donateUrl:           ""
+images:
+    productLogo:         "novaos-logo.png"
+    productIcon:         "novaos-logo.png"
+    productWelcome:      "novaos-logo.png"
+slideshow:               "show.qml"
+slideshowAPI:            2
+style:
+    sidebarBackground:        "#1a1a2e"
+    sidebarText:              "#e0e0e0"
+    sidebarTextSelect:        "#4fc3f7"
+    sidebarTextHighlight:     "#ffffff"
+windowExpanding:    normal
+windowSize:         800px,520px
+windowPlacement:    center
+EOF
+
+# --- Create module configs inline ---
+cat > "${CALA_DIR}/modules/welcome.conf" << 'EOF'
+---
+showSupportUrl: true
+showKnownIssuesUrl: true
+showReleaseNotesUrl: true
+showDonateUrl: false
+requirements:
+    requiredStorage:    8.0
+    requiredRam:        0.5
+    check:
+        - storage
+        - ram
+        - root
+    required:
+        - storage
+        - ram
+        - root
+EOF
+
+cat > "${CALA_DIR}/modules/partition.conf" << 'EOF'
+---
+defaultFileSystemType: "ext4"
+efiSystemPartitionSize: 300
+drawNestedPartitions: false
+alwaysShowPartitionLabels: true
+availableFileSystemTypes: ["ext4", "btrfs", "xfs", "fat32"]
+initialPartitioningChoice: erase
+initialSwapChoice: small
+EOF
+
+cat > "${CALA_DIR}/modules/users.conf" << 'EOF'
+---
+defaultGroups:
+    - name: users
+      must_exist: true
+      system: true
+    - adm
+    - cdrom
+    - sudo
+    - dip
+    - plugdev
+    - lpadmin
+    - audio
+    - video
+    - netdev
+autologinGroup: autologin
+sudoersGroup: sudo
+passwordRequirements:
+    minLength: 1
+    maxLength: -1
+allowWeakPasswords: true
+allowWeakPasswordsDefault: false
+userShell: /bin/bash
+setHostname: EtcFile
+writeHostsFile: true
+EOF
+
+cat > "${CALA_DIR}/modules/bootloader.conf" << 'EOF'
+---
+efiBootLoader: "grub"
+grubInstall: "grub-install"
+grubMkconfig: "grub-mkconfig"
+grubCfg: "/boot/grub/grub.cfg"
+grubProbe: "grub-probe"
+efiDirectory: "/boot/efi"
+installEFIFallback: true
+EOF
+
+cat > "${CALA_DIR}/modules/packages.conf" << 'EOF'
+---
+backend: apt
+operations:
+  - remove:
+    - calamares
+    - calamares-settings-debian
+    - live-boot
+    - live-config
+    - live-config-systemd
+  - try_remove:
+    - os-prober
+EOF
+
+cat > "${CALA_DIR}/modules/finished.conf" << 'EOF'
+---
+restartNowEnabled: true
+restartNowChecked: true
+restartNowCommand: "systemctl reboot"
+notifyOnFinished: true
+EOF
+
 cat > "${CALA_DIR}/modules/unpackfs.conf" << 'EOF'
 ---
 unpack:
@@ -67,7 +209,6 @@ unpack:
     destination: ""
 EOF
 
-# --- Configure displaymanager module ---
 cat > "${CALA_DIR}/modules/displaymanager.conf" << 'EOF'
 ---
 displaymanagers:

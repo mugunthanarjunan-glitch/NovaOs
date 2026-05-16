@@ -2,8 +2,9 @@
 # ============================================================================
 # NovaOS Build Hook: Configure XFCE Desktop
 # ============================================================================
-# Sets up the default XFCE configuration for all new users.
-# Files are placed in /etc/skel/ so every new user gets them.
+# Sets up default XFCE configuration for all new users via /etc/skel/.
+# Most config files are already placed by includes.chroot, this hook
+# creates the XFCE channel XML configs that define theme/panel/WM settings.
 # ============================================================================
 
 set -e
@@ -11,134 +12,156 @@ echo "[NovaOS Hook] Configuring XFCE desktop environment..."
 
 # --- Create skeleton directories ---
 SKEL="/etc/skel"
-mkdir -p "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml"
+XFCE_CONF="${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml"
+mkdir -p "${XFCE_CONF}"
 mkdir -p "${SKEL}/.config/xfce4/panel"
 mkdir -p "${SKEL}/.config/picom"
 mkdir -p "${SKEL}/.config/gtk-3.0"
+mkdir -p "${SKEL}/.config/autostart"
+mkdir -p "${SKEL}/.config/xfce4/terminal"
 mkdir -p "${SKEL}/.local/share/applications"
 
-# --- Copy XFCE panel layout ---
-# These files should already be in the chroot via includes.chroot
-if [ -f /tmp/novaos-configs/xfce4-panel.xml ]; then
-    cp /tmp/novaos-configs/xfce4-panel.xml \
-       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
-fi
+# --- XFCE Settings (theme, icons, fonts, cursor) ---
+cat > "${XFCE_CONF}/xsettings.xml" << 'XMLEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xsettings" version="1.0">
+  <property name="Net" type="empty">
+    <property name="ThemeName" type="string" value="Orchis-Dark"/>
+    <property name="IconThemeName" type="string" value="Papirus-Dark"/>
+    <property name="CursorThemeName" type="string" value="Adwaita"/>
+    <property name="EnableEventSounds" type="bool" value="false"/>
+    <property name="EnableInputFeedbackSounds" type="bool" value="false"/>
+  </property>
+  <property name="Xft" type="empty">
+    <property name="Antialias" type="int" value="1"/>
+    <property name="Hinting" type="int" value="1"/>
+    <property name="HintStyle" type="string" value="hintslight"/>
+    <property name="RGBA" type="string" value="rgb"/>
+    <property name="DPI" type="int" value="96"/>
+  </property>
+  <property name="Gtk" type="empty">
+    <property name="FontName" type="string" value="Inter 10"/>
+    <property name="MonospaceFontName" type="string" value="DejaVu Sans Mono 10"/>
+    <property name="CursorThemeSize" type="int" value="24"/>
+    <property name="DecorationLayout" type="string" value="menu:minimize,maximize,close"/>
+  </property>
+</channel>
+XMLEOF
 
-if [ -f /tmp/novaos-configs/xsettings.xml ]; then
-    cp /tmp/novaos-configs/xsettings.xml \
-       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
-fi
+# --- XFWM4 Window Manager ---
+cat > "${XFCE_CONF}/xfwm4.xml" << 'XMLEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfwm4" version="1.0">
+  <property name="general" type="empty">
+    <property name="theme" type="string" value="Orchis-Dark"/>
+    <property name="title_font" type="string" value="Inter Semi-Bold 10"/>
+    <property name="title_alignment" type="string" value="center"/>
+    <property name="button_layout" type="string" value="O|HMC"/>
+    <property name="snap_to_border" type="bool" value="true"/>
+    <property name="snap_to_windows" type="bool" value="true"/>
+    <property name="tile_on_move" type="bool" value="true"/>
+    <property name="click_to_focus" type="bool" value="true"/>
+    <property name="focus_new" type="bool" value="true"/>
+    <property name="placement_mode" type="string" value="center"/>
+    <property name="use_compositing" type="bool" value="false"/>
+    <property name="workspace_count" type="int" value="2"/>
+  </property>
+</channel>
+XMLEOF
 
-if [ -f /tmp/novaos-configs/xfwm4.xml ]; then
-    cp /tmp/novaos-configs/xfwm4.xml \
-       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
-fi
+# --- Desktop (wallpaper, no desktop icons) ---
+cat > "${XFCE_CONF}/xfce4-desktop.xml" << 'XMLEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitorVirtual-1" type="empty">
+        <property name="workspace0" type="empty">
+          <property name="image-style" type="int" value="5"/>
+          <property name="last-image" type="string" value="/usr/share/backgrounds/novaos/novaos-default.png"/>
+        </property>
+      </property>
+    </property>
+  </property>
+  <property name="desktop-icons" type="empty">
+    <property name="style" type="int" value="2"/>
+  </property>
+</channel>
+XMLEOF
 
-if [ -f /tmp/novaos-configs/xfce4-desktop.xml ]; then
-    cp /tmp/novaos-configs/xfce4-desktop.xml \
-       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
-fi
-
-# --- GTK3 Settings ---
-cat > "${SKEL}/.config/gtk-3.0/settings.ini" << 'EOF'
-[Settings]
-gtk-theme-name=Orchis-Dark
-gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=Inter 10
-gtk-cursor-theme-name=Adwaita
-gtk-cursor-theme-size=24
-gtk-toolbar-style=GTK_TOOLBAR_ICONS
-gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
-gtk-button-images=0
-gtk-menu-images=0
-gtk-enable-event-sounds=0
-gtk-enable-input-feedback-sounds=0
-gtk-xft-antialias=1
-gtk-xft-hinting=1
-gtk-xft-hintstyle=hintslight
-gtk-xft-rgba=rgb
-gtk-application-prefer-dark-theme=1
-EOF
-
-# --- GTK2 Settings ---
-cat > "${SKEL}/.gtkrc-2.0" << 'EOF'
-gtk-theme-name="Orchis-Dark"
-gtk-icon-theme-name="Papirus-Dark"
-gtk-font-name="Inter 10"
-gtk-cursor-theme-name="Adwaita"
-gtk-cursor-theme-size=24
-gtk-toolbar-style=GTK_TOOLBAR_ICONS
-gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
-gtk-button-images=0
-gtk-menu-images=0
-gtk-enable-event-sounds=0
-gtk-enable-input-feedback-sounds=0
-EOF
-
-# --- Picom Compositor Config ---
-cat > "${SKEL}/.config/picom/picom.conf" << 'EOF'
-backend = "xrender";
-vsync = true;
-fading = true;
-fade-in-step = 0.07;
-fade-out-step = 0.07;
-fade-delta = 5;
-no-fading-destroyed-argb = true;
-shadow = false;
-inactive-opacity = 0.95;
-active-opacity = 1.0;
-frame-opacity = 1.0;
-opacity-rule = [
-    "100:class_g = 'xfce4-panel'",
-    "100:window_type = 'menu'",
-    "100:window_type = 'dropdown_menu'",
-    "100:window_type = 'popup_menu'",
-    "100:window_type = 'tooltip'"
-];
-corner-radius = 8;
-rounded-corners-exclude = [
-    "class_g = 'xfce4-panel'",
-    "window_type = 'dock'"
-];
-use-damage = true;
-wintypes:
-{
-    tooltip = { fade = true; shadow = false; opacity = 0.95; };
-    dock = { shadow = false; };
-    dnd = { shadow = false; };
-    popup_menu = { fade = false; shadow = false; opacity = 1.0; };
-    dropdown_menu = { fade = false; shadow = false; opacity = 1.0; };
-};
-EOF
-
-# --- XFCE4 Terminal Config ---
-mkdir -p "${SKEL}/.config/xfce4/terminal"
-cat > "${SKEL}/.config/xfce4/terminal/terminalrc" << 'EOF'
-[Configuration]
-FontName=DejaVu Sans Mono 11
-ColorForeground=#e0e0e0
-ColorBackground=#1a1a2e
-ColorPalette=#1a1a2e;#ff5555;#50fa7b;#f1fa8c;#4fc3f7;#bd93f9;#8be9fd;#bbbbbb;#555555;#ff6e6e;#69ff94;#ffffa5;#79d4ff;#d6acff;#a4ffff;#ffffff
-MiscAlwaysShowTabs=FALSE
-MiscBell=FALSE
-MiscConfirmClose=TRUE
-MiscDefaultGeometry=100x30
-ScrollingBar=TERMINAL_SCROLLBAR_NONE
-BackgroundMode=TERMINAL_BACKGROUND_TRANSPARENT
-BackgroundDarkness=0.92
-EOF
+# --- Panel Layout (top bar) ---
+cat > "${XFCE_CONF}/xfce4-panel.xml" << 'XMLEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-panel" version="1.0">
+  <property name="configver" type="int" value="2"/>
+  <property name="panels" type="array">
+    <value type="int" value="1"/>
+  </property>
+  <property name="panel-1" type="empty">
+    <property name="position" type="string" value="p=6;x=0;y=0"/>
+    <property name="length" type="uint" value="100"/>
+    <property name="position-locked" type="bool" value="true"/>
+    <property name="size" type="uint" value="30"/>
+    <property name="plugin-ids" type="array">
+      <value type="int" value="1"/>
+      <value type="int" value="2"/>
+      <value type="int" value="3"/>
+      <value type="int" value="4"/>
+      <value type="int" value="5"/>
+      <value type="int" value="6"/>
+      <value type="int" value="7"/>
+      <value type="int" value="8"/>
+      <value type="int" value="9"/>
+    </property>
+  </property>
+  <property name="plugin-1" type="string" value="whiskermenu"/>
+  <property name="plugin-2" type="string" value="separator">
+    <property name="expand" type="bool" value="true"/>
+    <property name="style" type="uint" value="0"/>
+  </property>
+  <property name="plugin-3" type="string" value="tasklist">
+    <property name="flat-buttons" type="bool" value="true"/>
+    <property name="show-labels" type="bool" value="true"/>
+    <property name="grouping" type="uint" value="1"/>
+  </property>
+  <property name="plugin-4" type="string" value="separator">
+    <property name="expand" type="bool" value="true"/>
+    <property name="style" type="uint" value="0"/>
+  </property>
+  <property name="plugin-5" type="string" value="systray"/>
+  <property name="plugin-6" type="string" value="pulseaudio"/>
+  <property name="plugin-7" type="string" value="power-manager-plugin"/>
+  <property name="plugin-8" type="string" value="clock">
+    <property name="digital-format" type="string" value="%b %d  %H:%M"/>
+    <property name="mode" type="uint" value="2"/>
+  </property>
+  <property name="plugin-9" type="string" value="actions"/>
+</channel>
+XMLEOF
 
 # --- Autostart picom compositor ---
-mkdir -p "${SKEL}/.config/autostart"
 cat > "${SKEL}/.config/autostart/picom.desktop" << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=Picom Compositor
-Comment=Lightweight compositor for smooth effects
 Exec=picom --config ~/.config/picom/picom.conf -b
 Hidden=false
 NoDisplay=true
 X-GNOME-Autostart-enabled=true
 EOF
+
+# --- Copy wallpapers to system location ---
+WALLPAPER_DIR="/usr/share/backgrounds/novaos"
+mkdir -p "${WALLPAPER_DIR}"
+# Wallpapers are placed via includes.chroot, but create a fallback solid color
+if [ ! -f "${WALLPAPER_DIR}/novaos-default.png" ]; then
+    echo "[NovaOS Hook] No wallpaper found, will use theme defaults."
+fi
+
+# --- Copy logo for LightDM and Plymouth ---
+mkdir -p /usr/share/pixmaps
+if [ -f "${WALLPAPER_DIR}/../plymouth/images/novaos-logo.png" ]; then
+    cp "${WALLPAPER_DIR}/../plymouth/images/novaos-logo.png" /usr/share/pixmaps/novaos-logo.png 2>/dev/null || true
+fi
 
 echo "[NovaOS Hook] ✅ XFCE desktop configured."

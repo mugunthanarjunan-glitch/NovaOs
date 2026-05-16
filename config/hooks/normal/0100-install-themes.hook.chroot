@@ -6,7 +6,8 @@
 # Runs inside the chroot during live-build.
 # ============================================================================
 
-set -e
+# Note: We do NOT use 'set -e' here because theme downloads may fail
+# (e.g. no internet) and we want the build to continue with fallbacks.
 echo "[NovaOS Hook] Installing themes..."
 
 # --- Install Orchis GTK Theme ---
@@ -40,7 +41,7 @@ wget -qO- https://git.io/papirus-icon-theme-install | DESTDIR="/usr/share/icons"
 }
 
 # --- Ensure Adwaita cursor theme is available ---
-apt-get install -y adwaita-icon-theme-full 2>/dev/null || true
+apt-get install -y adwaita-icon-theme 2>/dev/null || true
 
 # --- Cleanup ---
 rm -rf /tmp/orchis-theme /tmp/papirus-install 2>/dev/null || true

@@ -1,0 +1,24 @@
+# Ensure all shell scripts and Linux config files use LF line endings
+# (Windows Git defaults to CRLF which breaks bash scripts)
+
+# Shell scripts
+*.sh text eol=lf
+*.hook.chroot text eol=lf
+
+# Config files
+*.conf text eol=lf
+*.list.chroot text eol=lf
+*.plymouth text eol=lf
+*.script text eol=lf
+*.desktop text eol=lf
+*.xml text eol=lf
+*.ini text eol=lf
+*.rc text eol=lf
+*.qml text eol=lf
+*.desc text eol=lf
+*.yml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.iso binary

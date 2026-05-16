@@ -18,10 +18,12 @@ systemd-sysv
 
 # --- Bootloader (supports both BIOS and EFI) ---
 grub-efi-amd64
+grub-efi-amd64-signed
 grub-pc-bin
 grub-common
 grub2-common
 efibootmgr
+shim-signed
 
 # --- Firmware ---
 firmware-linux-free

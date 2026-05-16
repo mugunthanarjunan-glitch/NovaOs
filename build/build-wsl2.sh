@@ -72,11 +72,18 @@ fi
 # --- Step 4: Configure live-build ---
 log "⚙️  Configuring live-build..."
 lb config \
+    --mode debian \
     --binary-images "${IMAGE_TYPE}" \
     --distribution "${DEBIAN_RELEASE}" \
+    --parent-distribution "${DEBIAN_RELEASE}" \
+    --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --mirror-chroot "${DEBIAN_MIRROR}" \
     --mirror-chroot-security "http://security.debian.org/debian-security" \
+    --parent-mirror-chroot-security "http://security.debian.org/debian-security" \
+    --keyring-packages debian-archive-keyring \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \
@@ -96,6 +103,18 @@ if [ -d "${INCLUDES_DIR}" ]; then
     mkdir -p config/includes.chroot
     cp -r "${INCLUDES_DIR}"/* config/includes.chroot/
 fi
+
+# --- Copy Theme Assets ---
+log "🎨 Copying theme assets..."
+CHROOT="config/includes.chroot"
+mkdir -p "${CHROOT}/usr/share/backgrounds/novaos"
+mkdir -p "${CHROOT}/usr/share/plymouth/themes/novaos"
+mkdir -p "${CHROOT}/usr/share/pixmaps"
+cp "${THEMES_DIR}"/wallpapers/*.png "${CHROOT}/usr/share/backgrounds/novaos/" 2>/dev/null || true
+cp "${THEMES_DIR}"/plymouth/novaos.plymouth "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+cp "${THEMES_DIR}"/plymouth/novaos.script "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+cp "${THEMES_DIR}"/plymouth/images/*.png "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+cp "${THEMES_DIR}/plymouth/images/novaos-logo.png" "${CHROOT}/usr/share/pixmaps/novaos-logo.png" 2>/dev/null || true
 
 log "🔧 Copying build hooks..."
 if [ -d "${HOOKS_DIR}/normal" ]; then

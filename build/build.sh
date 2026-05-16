@@ -56,14 +56,22 @@ fi
 # --- Configure live-build ---
 log "⚙️  Configuring live-build..."
 
-# Note: We use = sign for compound options to prevent shell argument splitting.
-# The kernel is included via package-lists/base.list.chroot instead of --linux-packages.
+# Note: When building on Ubuntu, live-build defaults to ubuntu-keyring which
+# doesn't exist in Debian repos. We explicitly set --mode debian and
+# --keyring-packages to force Debian mode regardless of host OS.
 lb config \
+    --mode debian \
     --binary-images "${IMAGE_TYPE}" \
     --distribution "${DEBIAN_RELEASE}" \
+    --parent-distribution "${DEBIAN_RELEASE}" \
+    --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --mirror-chroot "${DEBIAN_MIRROR}" \
     --mirror-chroot-security "http://security.debian.org/debian-security" \
+    --parent-mirror-chroot-security "http://security.debian.org/debian-security" \
+    --keyring-packages debian-archive-keyring \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
     --debian-installer false \
@@ -85,6 +93,30 @@ if [ -d "${INCLUDES_DIR}" ]; then
     cp -r "${INCLUDES_DIR}"/* config/includes.chroot/
 fi
 
+# --- Copy Theme Assets (wallpapers, Plymouth, logo) ---
+log "🎨 Copying theme assets..."
+CHROOT="config/includes.chroot"
+
+# Wallpapers
+mkdir -p "${CHROOT}/usr/share/backgrounds/novaos"
+if [ -d "${THEMES_DIR}/wallpapers" ]; then
+    cp "${THEMES_DIR}"/wallpapers/*.png "${CHROOT}/usr/share/backgrounds/novaos/" 2>/dev/null || true
+fi
+
+# Plymouth theme
+mkdir -p "${CHROOT}/usr/share/plymouth/themes/novaos"
+if [ -d "${THEMES_DIR}/plymouth" ]; then
+    cp "${THEMES_DIR}"/plymouth/novaos.plymouth "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+    cp "${THEMES_DIR}"/plymouth/novaos.script "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+    cp "${THEMES_DIR}"/plymouth/images/*.png "${CHROOT}/usr/share/plymouth/themes/novaos/" 2>/dev/null || true
+fi
+
+# Logo for LightDM greeter
+mkdir -p "${CHROOT}/usr/share/pixmaps"
+if [ -f "${THEMES_DIR}/plymouth/images/novaos-logo.png" ]; then
+    cp "${THEMES_DIR}/plymouth/images/novaos-logo.png" "${CHROOT}/usr/share/pixmaps/novaos-logo.png"
+fi
+
 # --- Copy Hooks ---
 log "🔧 Copying build hooks..."
 if [ -d "${HOOKS_DIR}/normal" ]; then
@@ -95,6 +127,7 @@ fi
 if [ -d "${HOOKS_DIR}/live" ]; then
     mkdir -p config/hooks/live
     cp "${HOOKS_DIR}"/live/*.hook.chroot config/hooks/live/ 2>/dev/null || true
+    chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
 fi
 
 # --- Build the ISO ---

@@ -34,7 +34,8 @@ jobs:
             grub-efi-amd64-bin \
             grub-pc-bin \
             mtools \
-            dosfstools
+            dosfstools \
+            debian-archive-keyring
 
       - name: Make scripts executable
         run: |
@@ -42,6 +43,14 @@ jobs:
           chmod +x optimization/*.sh
           chmod +x config/hooks/normal/*.hook.chroot
           chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
+
+      - name: Fix line endings (Windows→Linux)
+        run: |
+          sudo apt-get install -y dos2unix
+          find . -name "*.sh" -exec dos2unix {} \;
+          find . -name "*.hook.chroot" -exec dos2unix {} \;
+          find . -name "*.list.chroot" -exec dos2unix {} \;
+          find . -name "*.conf" -exec dos2unix {} \;
 
       - name: Build NovaOS ISO
         run: |
