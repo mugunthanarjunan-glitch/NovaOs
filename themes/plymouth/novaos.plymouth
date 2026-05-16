@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=NovaOS
+Description=NovaOS modern boot splash with animated logo
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/novaos
+ScriptFile=/usr/share/plymouth/themes/novaos/novaos.script

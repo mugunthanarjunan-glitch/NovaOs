@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Picom Compositor
+Comment=Lightweight compositor for smooth effects
+Exec=picom --config ~/.config/picom/picom.conf -b
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

@@ -1,0 +1,12 @@
+[Configuration]
+FontName=DejaVu Sans Mono 11
+ColorForeground=#e0e0e0
+ColorBackground=#1a1a2e
+ColorPalette=#1a1a2e;#ff5555;#50fa7b;#f1fa8c;#4fc3f7;#bd93f9;#8be9fd;#bbbbbb;#555555;#ff6e6e;#69ff94;#ffffa5;#79d4ff;#d6acff;#a4ffff;#ffffff
+MiscAlwaysShowTabs=FALSE
+MiscBell=FALSE
+MiscConfirmClose=TRUE
+MiscDefaultGeometry=100x30
+ScrollingBar=TERMINAL_SCROLLBAR_NONE
+BackgroundMode=TERMINAL_BACKGROUND_TRANSPARENT
+BackgroundDarkness=0.92

@@ -1,0 +1,71 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Build Hook: Configure Plymouth Boot Splash
+# ============================================================================
+# Installs the NovaOS Plymouth theme and sets it as default.
+# ============================================================================
+
+set -e
+echo "[NovaOS Hook] Configuring Plymouth boot splash..."
+
+PLYMOUTH_DIR="/usr/share/plymouth/themes/novaos"
+mkdir -p "${PLYMOUTH_DIR}"
+
+# --- Copy theme files (from includes.chroot) ---
+if [ -d /tmp/novaos-plymouth ]; then
+    cp /tmp/novaos-plymouth/novaos.plymouth "${PLYMOUTH_DIR}/" 2>/dev/null || true
+    cp /tmp/novaos-plymouth/novaos.script "${PLYMOUTH_DIR}/" 2>/dev/null || true
+    cp /tmp/novaos-plymouth/images/* "${PLYMOUTH_DIR}/" 2>/dev/null || true
+fi
+
+# If theme files are already in the right place via includes.chroot, skip
+if [ ! -f "${PLYMOUTH_DIR}/novaos.plymouth" ]; then
+    echo "[NovaOS Hook] Creating default Plymouth theme..."
+    
+    cat > "${PLYMOUTH_DIR}/novaos.plymouth" << 'EOF'
+[Plymouth Theme]
+Name=NovaOS
+Description=NovaOS modern boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/novaos
+ScriptFile=/usr/share/plymouth/themes/novaos/novaos.script
+EOF
+
+    cat > "${PLYMOUTH_DIR}/novaos.script" << 'SCRIPT'
+Window.SetBackgroundTopColor(0.10, 0.10, 0.18);
+Window.SetBackgroundBottomColor(0.06, 0.06, 0.12);
+
+# Simple text-based splash as fallback
+msg = Image.Text("NovaOS", 1, 1, 1, "Sans 24");
+sprite = Sprite(msg);
+sprite.SetX(Window.GetWidth() / 2 - msg.GetWidth() / 2);
+sprite.SetY(Window.GetHeight() / 2 - msg.GetHeight() / 2);
+
+fun refresh_callback() { }
+Plymouth.SetRefreshFunction(refresh_callback);
+
+fun message_callback(text) {
+    t = Image.Text(text, 0.6, 0.6, 0.7, "Sans 12");
+    s = Sprite(t);
+    s.SetX(Window.GetWidth() / 2 - t.GetWidth() / 2);
+    s.SetY(Window.GetHeight() - 50);
+}
+Plymouth.SetMessageFunction(message_callback);
+SCRIPT
+fi
+
+# --- Set as default Plymouth theme ---
+plymouth-set-default-theme novaos 2>/dev/null || {
+    # Alternative method
+    update-alternatives --install /usr/share/plymouth/themes/default.plymouth \
+        default.plymouth "${PLYMOUTH_DIR}/novaos.plymouth" 200 2>/dev/null || true
+    update-alternatives --set default.plymouth \
+        "${PLYMOUTH_DIR}/novaos.plymouth" 2>/dev/null || true
+}
+
+# --- Update initramfs to include Plymouth theme ---
+update-initramfs -u 2>/dev/null || true
+
+echo "[NovaOS Hook] ✅ Plymouth boot splash configured."

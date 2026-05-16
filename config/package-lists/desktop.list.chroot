@@ -1,0 +1,63 @@
+# ============================================================================
+# NovaOS Desktop Environment Packages
+# ============================================================================
+# XFCE desktop with X11, compositor, login manager, and fonts.
+# ============================================================================
+
+# --- X11 Display Server ---
+xorg
+xserver-xorg
+xserver-xorg-input-all
+xserver-xorg-video-all
+xinit
+
+# --- XFCE Core ---
+xfce4
+xfce4-session
+xfce4-panel
+xfce4-settings
+xfwm4
+xfdesktop4
+xfconf
+
+# --- XFCE Plugins ---
+xfce4-whiskermenu-plugin
+xfce4-pulseaudio-plugin
+xfce4-notifyd
+xfce4-power-manager
+xfce4-power-manager-plugins
+xfce4-screenshooter
+xfce4-taskmanager
+xfce4-clipman-plugin
+
+# --- Login Manager ---
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+
+# --- Compositor (smooth effects) ---
+picom
+
+# --- Boot Splash ---
+plymouth
+plymouth-themes
+
+# --- Audio ---
+pulseaudio
+pavucontrol
+alsa-utils
+
+# --- Fonts (modern, clean) ---
+fonts-inter
+fonts-noto-core
+fonts-noto-color-emoji
+fonts-dejavu-core
+
+# --- Theming Support ---
+gtk2-engines-murrine
+gtk2-engines-pixbuf
+libglib2.0-bin
+dbus-x11
+
+# --- Accessibility ---
+at-spi2-core

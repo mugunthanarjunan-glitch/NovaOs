@@ -1,0 +1,50 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Build Hook: Install Themes
+# ============================================================================
+# Downloads and installs GTK theme, icon theme, and cursor theme.
+# Runs inside the chroot during live-build.
+# ============================================================================
+
+set -e
+echo "[NovaOS Hook] Installing themes..."
+
+# --- Install Orchis GTK Theme ---
+echo "[NovaOS Hook] Downloading Orchis GTK theme..."
+cd /tmp
+
+# Download Orchis theme from GitHub
+apt-get install -y git sassc 2>/dev/null || true
+
+git clone --depth=1 https://github.com/vinceliuice/Orchis-theme.git /tmp/orchis-theme 2>/dev/null || {
+    echo "[NovaOS Hook] ⚠️ Could not clone Orchis theme. Using fallback..."
+    # Fallback: install a dark theme from Debian repos
+    apt-get install -y numix-gtk-theme 2>/dev/null || true
+}
+
+if [ -d /tmp/orchis-theme ]; then
+    cd /tmp/orchis-theme
+    ./install.sh -d /usr/share/themes -t default -c dark --tweaks solid 2>/dev/null || {
+        echo "[NovaOS Hook] Running Orchis install with basic options..."
+        ./install.sh -d /usr/share/themes 2>/dev/null || true
+    }
+fi
+
+# --- Install Papirus Icon Theme ---
+echo "[NovaOS Hook] Installing Papirus icon theme..."
+wget -qO- https://git.io/papirus-icon-theme-install | DESTDIR="/usr/share/icons" sh 2>/dev/null || {
+    echo "[NovaOS Hook] Wget method failed, trying apt..."
+    apt-get install -y papirus-icon-theme 2>/dev/null || {
+        echo "[NovaOS Hook] ⚠️ Could not install Papirus. Using fallback Adwaita icons."
+    }
+}
+
+# --- Ensure Adwaita cursor theme is available ---
+apt-get install -y adwaita-icon-theme-full 2>/dev/null || true
+
+# --- Cleanup ---
+rm -rf /tmp/orchis-theme /tmp/papirus-install 2>/dev/null || true
+apt-get remove -y git sassc 2>/dev/null || true
+apt-get autoremove -y 2>/dev/null || true
+
+echo "[NovaOS Hook] ✅ Themes installed."

@@ -1,0 +1,144 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Build Hook: Configure XFCE Desktop
+# ============================================================================
+# Sets up the default XFCE configuration for all new users.
+# Files are placed in /etc/skel/ so every new user gets them.
+# ============================================================================
+
+set -e
+echo "[NovaOS Hook] Configuring XFCE desktop environment..."
+
+# --- Create skeleton directories ---
+SKEL="/etc/skel"
+mkdir -p "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml"
+mkdir -p "${SKEL}/.config/xfce4/panel"
+mkdir -p "${SKEL}/.config/picom"
+mkdir -p "${SKEL}/.config/gtk-3.0"
+mkdir -p "${SKEL}/.local/share/applications"
+
+# --- Copy XFCE panel layout ---
+# These files should already be in the chroot via includes.chroot
+if [ -f /tmp/novaos-configs/xfce4-panel.xml ]; then
+    cp /tmp/novaos-configs/xfce4-panel.xml \
+       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+fi
+
+if [ -f /tmp/novaos-configs/xsettings.xml ]; then
+    cp /tmp/novaos-configs/xsettings.xml \
+       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
+fi
+
+if [ -f /tmp/novaos-configs/xfwm4.xml ]; then
+    cp /tmp/novaos-configs/xfwm4.xml \
+       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
+fi
+
+if [ -f /tmp/novaos-configs/xfce4-desktop.xml ]; then
+    cp /tmp/novaos-configs/xfce4-desktop.xml \
+       "${SKEL}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
+fi
+
+# --- GTK3 Settings ---
+cat > "${SKEL}/.config/gtk-3.0/settings.ini" << 'EOF'
+[Settings]
+gtk-theme-name=Orchis-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=Inter 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=0
+gtk-enable-event-sounds=0
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+gtk-application-prefer-dark-theme=1
+EOF
+
+# --- GTK2 Settings ---
+cat > "${SKEL}/.gtkrc-2.0" << 'EOF'
+gtk-theme-name="Orchis-Dark"
+gtk-icon-theme-name="Papirus-Dark"
+gtk-font-name="Inter 10"
+gtk-cursor-theme-name="Adwaita"
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=0
+gtk-enable-event-sounds=0
+gtk-enable-input-feedback-sounds=0
+EOF
+
+# --- Picom Compositor Config ---
+cat > "${SKEL}/.config/picom/picom.conf" << 'EOF'
+backend = "xrender";
+vsync = true;
+fading = true;
+fade-in-step = 0.07;
+fade-out-step = 0.07;
+fade-delta = 5;
+no-fading-destroyed-argb = true;
+shadow = false;
+inactive-opacity = 0.95;
+active-opacity = 1.0;
+frame-opacity = 1.0;
+opacity-rule = [
+    "100:class_g = 'xfce4-panel'",
+    "100:window_type = 'menu'",
+    "100:window_type = 'dropdown_menu'",
+    "100:window_type = 'popup_menu'",
+    "100:window_type = 'tooltip'"
+];
+corner-radius = 8;
+rounded-corners-exclude = [
+    "class_g = 'xfce4-panel'",
+    "window_type = 'dock'"
+];
+use-damage = true;
+wintypes:
+{
+    tooltip = { fade = true; shadow = false; opacity = 0.95; };
+    dock = { shadow = false; };
+    dnd = { shadow = false; };
+    popup_menu = { fade = false; shadow = false; opacity = 1.0; };
+    dropdown_menu = { fade = false; shadow = false; opacity = 1.0; };
+};
+EOF
+
+# --- XFCE4 Terminal Config ---
+mkdir -p "${SKEL}/.config/xfce4/terminal"
+cat > "${SKEL}/.config/xfce4/terminal/terminalrc" << 'EOF'
+[Configuration]
+FontName=DejaVu Sans Mono 11
+ColorForeground=#e0e0e0
+ColorBackground=#1a1a2e
+ColorPalette=#1a1a2e;#ff5555;#50fa7b;#f1fa8c;#4fc3f7;#bd93f9;#8be9fd;#bbbbbb;#555555;#ff6e6e;#69ff94;#ffffa5;#79d4ff;#d6acff;#a4ffff;#ffffff
+MiscAlwaysShowTabs=FALSE
+MiscBell=FALSE
+MiscConfirmClose=TRUE
+MiscDefaultGeometry=100x30
+ScrollingBar=TERMINAL_SCROLLBAR_NONE
+BackgroundMode=TERMINAL_BACKGROUND_TRANSPARENT
+BackgroundDarkness=0.92
+EOF
+
+# --- Autostart picom compositor ---
+mkdir -p "${SKEL}/.config/autostart"
+cat > "${SKEL}/.config/autostart/picom.desktop" << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Picom Compositor
+Comment=Lightweight compositor for smooth effects
+Exec=picom --config ~/.config/picom/picom.conf -b
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+EOF
+
+echo "[NovaOS Hook] ✅ XFCE desktop configured."

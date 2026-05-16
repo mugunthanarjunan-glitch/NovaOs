@@ -1,0 +1,65 @@
+# ============================================================================
+# NovaOS — GitHub Actions ISO Build
+# ============================================================================
+# Builds the NovaOS ISO entirely in the cloud.
+# Push to GitHub → ISO gets built automatically → Download it.
+#
+# No Linux host required at all!
+# ============================================================================
+
+name: Build NovaOS ISO
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            live-build \
+            debootstrap \
+            squashfs-tools \
+            xorriso \
+            grub-efi-amd64-bin \
+            grub-pc-bin \
+            mtools \
+            dosfstools
+
+      - name: Make scripts executable
+        run: |
+          chmod +x build/*.sh
+          chmod +x optimization/*.sh
+          chmod +x config/hooks/normal/*.hook.chroot
+          chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
+
+      - name: Build NovaOS ISO
+        run: |
+          sudo ./build/build.sh
+
+      - name: Find ISO file
+        id: find-iso
+        run: |
+          ISO_PATH=$(find build-dir/ -name "*.iso" | head -1)
+          echo "iso_path=${ISO_PATH}" >> $GITHUB_OUTPUT
+          echo "iso_name=$(basename ${ISO_PATH})" >> $GITHUB_OUTPUT
+          echo "Found ISO: ${ISO_PATH}"
+          ls -lh ${ISO_PATH}
+
+      - name: Upload ISO as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaOS-ISO
+          path: ${{ steps.find-iso.outputs.iso_path }}
+          retention-days: 7
+          compression-level: 0  # ISO is already compressed

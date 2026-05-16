@@ -1,0 +1,52 @@
+# ============================================================================
+# NovaOS Base System Packages
+# ============================================================================
+# Core packages required for the system to boot and function.
+# These are the absolute essentials.
+# ============================================================================
+
+# --- Kernel ---
+linux-image-amd64
+
+# --- Live System ---
+live-boot
+live-config
+live-config-systemd
+
+# --- Init System ---
+systemd-sysv
+
+# --- Bootloader (supports both BIOS and EFI) ---
+grub-efi-amd64
+grub-pc-bin
+grub-common
+grub2-common
+efibootmgr
+
+# --- Firmware ---
+firmware-linux-free
+
+# --- Core Utilities ---
+sudo
+bash
+bash-completion
+locales
+console-setup
+keyboard-configuration
+apt-utils
+ca-certificates
+gnupg
+
+# --- Networking ---
+network-manager
+wpasupplicant
+iproute2
+iputils-ping
+ifupdown
+dhcpcd-base
+
+# --- Filesystem ---
+e2fsprogs
+dosfstools
+ntfs-3g
+btrfs-progs

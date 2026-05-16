@@ -1,0 +1,119 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Build Hook: Optimize Services & Performance
+# ============================================================================
+# Applies all performance optimizations during the build.
+# ============================================================================
+
+set -e
+echo "[NovaOS Hook] Applying performance optimizations..."
+
+# =============================================
+# 1. Disable unnecessary services
+# =============================================
+echo "[NovaOS Hook] Disabling unnecessary services..."
+
+SERVICES_TO_DISABLE=(
+    "cups.service"
+    "cups-browsed.service"
+    "ModemManager.service"
+    "avahi-daemon.service"
+    "bluetooth.service"
+    "accounts-daemon.service"
+    "rsyslog.service"
+    "cron.service"
+    "NetworkManager-wait-online.service"
+)
+
+for svc in "${SERVICES_TO_DISABLE[@]}"; do
+    systemctl disable "${svc}" 2>/dev/null || true
+done
+
+# Mask services that should never run
+systemctl mask lvm2-monitor.service 2>/dev/null || true
+systemctl mask lvm2-lvmpolld.service 2>/dev/null || true
+
+# =============================================
+# 2. Kernel parameter tuning
+# =============================================
+echo "[NovaOS Hook] Installing sysctl tuning..."
+cat > /etc/sysctl.d/99-novaos-performance.conf << 'EOF'
+vm.swappiness = 10
+vm.vfs_cache_pressure = 50
+vm.dirty_ratio = 10
+vm.dirty_background_ratio = 5
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.ip_forward = 0
+EOF
+
+# =============================================
+# 3. Configure ZRAM
+# =============================================
+echo "[NovaOS Hook] Configuring ZRAM..."
+cat > /etc/default/zramswap << 'EOF'
+ALGO=lz4
+PERCENT=50
+PRIORITY=100
+EOF
+
+# Disable disk swap in fstab
+if [ -f /etc/fstab ]; then
+    sed -i '/\sswap\s/s/^/#/' /etc/fstab 2>/dev/null || true
+fi
+
+systemctl enable zramswap.service 2>/dev/null || true
+
+# =============================================
+# 4. Boot optimization
+# =============================================
+echo "[NovaOS Hook] Optimizing boot..."
+
+# Reduce systemd timeouts
+mkdir -p /etc/systemd/system.conf.d
+cat > /etc/systemd/system.conf.d/novaos-timeouts.conf << 'EOF'
+[Manager]
+DefaultTimeoutStartSec=10s
+DefaultTimeoutStopSec=10s
+EOF
+
+# Limit journal size
+mkdir -p /etc/systemd/journald.conf.d
+cat > /etc/systemd/journald.conf.d/novaos-size.conf << 'EOF'
+[Journal]
+SystemMaxUse=50M
+RuntimeMaxUse=20M
+EOF
+
+# GRUB optimization
+if [ -f /etc/default/grub ]; then
+    sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=2/' /etc/default/grub
+    sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
+    sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="NovaOS"/' /etc/default/grub
+    update-grub 2>/dev/null || true
+fi
+
+# =============================================
+# 5. Cleanup to reduce image size
+# =============================================
+echo "[NovaOS Hook] Cleaning up to reduce image size..."
+
+# Clear APT cache
+apt-get clean
+apt-get autoremove -y 2>/dev/null || true
+
+# Remove unnecessary docs (saves ~100 MB)
+rm -rf /usr/share/doc/* 2>/dev/null || true
+rm -rf /usr/share/man/* 2>/dev/null || true
+rm -rf /usr/share/info/* 2>/dev/null || true
+rm -rf /usr/share/lintian/* 2>/dev/null || true
+
+# Clear tmp
+rm -rf /tmp/* 2>/dev/null || true
+
+echo "[NovaOS Hook] ✅ Performance optimizations applied."

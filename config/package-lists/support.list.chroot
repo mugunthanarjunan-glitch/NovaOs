@@ -1,0 +1,33 @@
+# ============================================================================
+# NovaOS App Platform Support
+# ============================================================================
+# Packages enabling Flatpak, AppImage, and Wine support.
+# ============================================================================
+
+# --- Flatpak ---
+flatpak
+gnome-software-plugin-flatpak
+
+# --- AppImage Runtime Dependency ---
+libfuse2
+
+# --- Wine (Windows App Compatibility) ---
+wine
+
+# --- ZRAM (Memory Optimization) ---
+zram-tools
+
+# --- System Installer ---
+calamares
+calamares-settings-debian
+
+# --- Useful CLI Tools ---
+curl
+wget
+git
+nano
+less
+man-db
+usbutils
+pciutils
+lsof

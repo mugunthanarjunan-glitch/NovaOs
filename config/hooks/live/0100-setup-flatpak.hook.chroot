@@ -1,0 +1,19 @@
+#!/bin/bash
+# ============================================================================
+# NovaOS Build Hook: Setup Flatpak
+# ============================================================================
+# Configures Flatpak with Flathub repository for the installed system.
+# This is a live hook that runs during the live session setup.
+# ============================================================================
+
+set -e
+echo "[NovaOS Hook] Configuring Flatpak..."
+
+# Add Flathub repository (the main Flatpak app store)
+flatpak remote-add --if-not-exists flathub \
+    https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || {
+    echo "[NovaOS Hook] ⚠️ Could not add Flathub (no internet during build)."
+    echo "[NovaOS Hook] Users will be prompted to add it on first launch."
+}
+
+echo "[NovaOS Hook] ✅ Flatpak configured."

@@ -1,0 +1,57 @@
+# ============================================================================
+# NovaOS Default Applications
+# ============================================================================
+# Lightweight, curated default apps for everyday use.
+# ============================================================================
+
+# --- Web Browser ---
+falkon
+
+# --- File Manager ---
+thunar
+thunar-archive-plugin
+thunar-volman
+thunar-media-tags-plugin
+gvfs
+gvfs-backends
+
+# --- Terminal ---
+xfce4-terminal
+
+# --- Text Editor ---
+mousepad
+
+# --- Media Player ---
+mpv
+parole
+
+# --- Image Viewer ---
+ristretto
+
+# --- Archive Manager ---
+engrampa
+p7zip-full
+unzip
+zip
+
+# --- Network Manager GUI ---
+network-manager-gnome
+
+# --- System Monitor ---
+xfce4-taskmanager
+htop
+
+# --- Software Center ---
+gnome-software
+
+# --- Disk Utility ---
+gparted
+
+# --- Calculator ---
+galculator
+
+# --- Screenshot ---
+xfce4-screenshooter
+
+# --- System Info ---
+neofetch

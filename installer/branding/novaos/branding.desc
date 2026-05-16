@@ -1,0 +1,50 @@
+# ============================================================================
+# NovaOS Calamares Branding
+# ============================================================================
+# Controls the visual identity of the installer.
+# ============================================================================
+
+---
+componentName: novaos
+
+# --- Welcome Message ---
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+
+# --- Strings ---
+strings:
+    productName:         "NovaOS"
+    shortProductName:    "NovaOS"
+    version:             "1.0"
+    shortVersion:        "1.0"
+    versionedName:       "NovaOS 1.0"
+    shortVersionedName:  "NovaOS 1.0"
+    bootloaderEntryName: "NovaOS"
+    productUrl:          "https://novaos.org"
+    supportUrl:          "https://novaos.org/support"
+    knownIssuesUrl:      "https://novaos.org/issues"
+    releaseNotesUrl:     "https://novaos.org/releases/1.0"
+    donateUrl:           ""
+
+# --- Images ---
+images:
+    productLogo:         "novaos-logo.png"
+    productIcon:         "novaos-icon.png"
+    productWelcome:      "novaos-welcome.png"
+    productWallpaper:    "novaos-wallpaper.png"
+
+# --- Slideshow ---
+slideshow:               "show.qml"
+slideshowAPI:            2
+
+# --- Style ---
+style:
+    sidebarBackground:        "#1a1a2e"
+    sidebarText:              "#e0e0e0"
+    sidebarTextSelect:        "#4fc3f7"
+    sidebarTextHighlight:     "#ffffff"
+
+# --- Window Size ---
+windowExpanding:    normal
+windowSize:         800px,520px
+windowPlacement:    center

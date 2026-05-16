@@ -1,0 +1,35 @@
+# NovaOS Whisker Menu Configuration
+# Modern app launcher settings
+
+favorites=xfce4-terminal.desktop,thunar.desktop,falkon.desktop,mousepad.desktop,xfce4-settings-manager.desktop,gnome-software.desktop
+button-title=Activities
+button-icon=novaos-logo
+button-single-row=false
+show-button-title=true
+show-button-icon=true
+show-command-edit=true
+show-command-settings=true
+show-command-lockscreen=true
+show-command-switchuser=false
+show-command-logoutuser=true
+show-command-restart=true
+show-command-shutdown=true
+show-command-suspend=true
+show-command-hibernate=false
+command-settings=xfce4-settings-manager
+command-lockscreen=xflock4
+command-switchuser=dm-tool switch-to-greeter
+command-logoutuser=xfce4-session-logout --logout
+command-restart=xfce4-session-logout --reboot
+command-shutdown=xfce4-session-logout --halt
+command-suspend=xfce4-session-logout --suspend
+menu-width=450
+menu-height=500
+menu-opacity=100
+category-show-name=true
+category-icon-size=1
+item-icon-size=2
+hover-switch-category=true
+position-search-alternate=true
+position-commands-alternate=false
+position-categories-alternate=true
