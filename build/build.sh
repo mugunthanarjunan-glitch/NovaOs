@@ -70,7 +70,6 @@ lb config \
     --mirror-bootstrap "${DEBIAN_MIRROR}" \
     --mirror-chroot "${DEBIAN_MIRROR}" \
     --security false \
-    --updates false \
     --keyring-packages debian-archive-keyring \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
