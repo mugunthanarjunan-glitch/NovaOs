@@ -46,6 +46,11 @@ if ! command -v syslinux &> /dev/null && [ ! -f /usr/share/syslinux/isolinux.bin
     err "syslinux is not installed. Run: sudo apt install syslinux"
 fi
 
+# Update Debian keyring to ensure we have latest keys
+log "🔐 Updating Debian keyring..."
+apt-get update
+apt-get install --only-upgrade -y debian-archive-keyring 2>/dev/null || true
+
 # --- Create Build Directory ---
 log "📁 Setting up build directory: ${BUILD_DIR}"
 mkdir -p "${PROJECT_ROOT}/${BUILD_DIR}"
@@ -61,23 +66,22 @@ fi
 # --- Configure live-build ---
 log "⚙️  Configuring live-build..."
 
-# Note: When building on Ubuntu, live-build defaults to ubuntu-keyring which
-# doesn't exist in Debian repos. We explicitly set --mode debian and
-# --keyring-packages to force Debian mode regardless of host OS.
-# Using Debian Bookworm (stable) as the base distribution.
+# CRITICAL: Force Debian mode explicitly
+# By default, lb tries to use Ubuntu if running on Ubuntu/WSL
+# We must specify --mode debian and use debian-archive-keyring
+log "📦 Forcing Debian (bookworm) mode..."
 lb config \
     --mode debian \
     --distribution bookworm \
-    --binary-images "${IMAGE_TYPE}" \
-    --distribution "${DEBIAN_RELEASE}" \
     --parent-distribution bookworm \
+    --keyring-packages debian-archive-keyring \
+    --binary-images "${IMAGE_TYPE}" \
+    --mirror-bootstrap "${DEBIAN_MIRROR}" \
+    --mirror-chroot "${DEBIAN_MIRROR}" \
     --parent-mirror-bootstrap "${DEBIAN_MIRROR}" \
     --parent-mirror-chroot "${DEBIAN_MIRROR}" \
     --archive-areas "${ARCHIVE_AREAS}" \
-    --mirror-bootstrap "${DEBIAN_MIRROR}" \
-    --mirror-chroot "${DEBIAN_MIRROR}" \
     --security false \
-    --keyring-packages debian-archive-keyring \
     --linux-packages "none" \
     --architectures "${ARCHITECTURE}" \
     --bootappend-live "${BOOT_APPEND}" \
